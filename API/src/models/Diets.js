@@ -6,7 +6,7 @@ const { DataTypes, UUIDV4 } = require('sequelize');
 module.exports = (sequelize) => {
   // defines the model
   sequelize.define('Diets', {
-    id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true, autoIncrement: true, },
+    id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
     name: { type: DataTypes.STRING, allowNull: false, unique: true, },
   }, { timestamps: false });
 };

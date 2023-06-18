@@ -1,0 +1,29 @@
+.container {
+  position: fixed;
+  top: 0px;
+  left: 10px;
+  z-index: .9;
+  width: 240px;
+  height: 100vh;
+  color: #fff;
+  background-color: #000;
+}
+
+.filterContainer {
+  text-align: left;
+  width: 1fr;
+  height: 82vh;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+
+}
+
+.navSpace {
+  width: 1fr;
+  height: 85px;
+  background-position: center;
+  background-size: contain;
+  background-repeat: no-repeat;
+}

@@ -1,0 +1,93 @@
+.conteiner {
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-attachment: fixed;
+    padding: 20px;
+}
+
+.infoContainer {
+    padding: 30px;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    background-color: rgba(0,0,0,.7);
+}
+
+.port {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.info {
+    width: 49%;
+    height: 450px;
+    display: grid;
+    place-content: center;
+    border: 1px solid #fff;
+}
+.info .text {
+    text-align: center;
+}
+.text h2 {
+    margin-bottom: 0;
+}
+.text p {
+    margin: 0 auto;
+}
+.foto {
+    width: 49%;
+    height: 450px;
+}
+.foto img {
+    width: 100%;
+    height: 100%;
+    margin: auto;
+    object-fit: cover;
+}
+
+.text {
+    text-align: left;
+}
+
+.steps {
+    display: grid;
+    grid-template-columns: 100px 1fr 400px;
+    border: 1px solid #fff;
+}
+.steps h3 {
+    margin: auto;
+    padding: 10px;
+}
+.steps p {
+    margin: auto 0;
+    padding: 10px;
+}
+.steps ul {
+    margin: auto 0;
+    padding: 10px;
+    display: grid;
+    grid-template-columns: repeat(2, 190px);
+}
+
+.waitConteiner {
+    width: 100%;
+    height: 88vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+.load {
+    color: #fff;
+    width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    animation: loading 3s steps(16) infinite;
+}
+@keyframes loading {
+    0% {width: 0;}
+    100% {width: 100%;}
+}

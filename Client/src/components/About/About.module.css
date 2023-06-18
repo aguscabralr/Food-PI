@@ -1,0 +1,38 @@
+.contenedor {
+    position: absolute;
+    top: 70px;
+    text-align: center;
+    display: flex;
+    flex-direction: row;
+    height: calc(100% - 70px);
+    width: 100%;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+.info {
+    position: relative;
+    width: 50%;
+    color: white;
+    background-color: rgba(0,0,0,.7);
+}
+
+.text {
+    position: absolute;
+    right: 0;
+    left: 0;
+    bottom: 30%;
+}
+
+.foto {
+    width: 50%;
+    margin: auto;
+}
+
+.foto img {
+    margin: auto;
+    width: 400px;
+    border: 10px outset white;
+    border-radius: 100%;
+}

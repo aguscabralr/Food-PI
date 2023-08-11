@@ -1,3 +1,18 @@
+// Import Server & DB;
+const server = require('./src/app.js');
+const { conn } = require('./src/db.js');
+// Port configuration;
+const PORT = 3001;
+
+// Syncing all the models at once;
+conn.sync({ alter: true })
+.then(() => {
+  server.listen(PORT, () => { console.log(`Listen server on port: ${PORT}`) });
+})
+.catch((error) => {
+  console.log(error.message);
+});
+
 //                       _oo0oo_
 //                      o8888888o
 //                      88" . "88
@@ -17,15 +32,3 @@
 //     =====`-.____`.___ \_____/___.-`___.-'=====
 //                       `=---='
 //     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-const server = require('./src/app.js');
-const { conn } = require('./src/db.js');
-const PORT = 3001;
-
-// Syncing all the models at once.
-conn.sync({ alter: true })
-  .then(() => {
-    server.listen(PORT, () => { console.log(`Listen server on port: ${PORT}`) });
-  })
-  .catch((error) => {
-    console.log(error.message);
-  });

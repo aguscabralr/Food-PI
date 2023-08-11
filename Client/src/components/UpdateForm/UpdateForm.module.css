@@ -1,0 +1,79 @@
+.container {
+  position: absolute;
+  height: calc(100% - 70px);
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.formContainer {
+  width: 80%;
+  margin: 20px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.divition {
+  width: 49%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  background-color: #fff8;
+}
+
+.inputContainer {
+  margin: 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+.range {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+.range input {
+  width: 90%;
+}
+.range span {
+  width: 5%;
+}
+
+.title {
+  display: flex;
+  flex-direction: row;
+  margin: auto;
+}
+.title button {
+  margin-left: 10px;
+}
+.step {
+  margin: 5px;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+.step input {
+  margin: 0 10px;
+  width: 60%;
+}
+
+.check {
+  display: grid;
+  justify-items: left;
+  grid-template-columns: 250px 250px;
+}
+
+.previewContainer {
+  width: 20%;
+  margin: 20px;
+  margin-left: 0;
+  padding: 10px;
+  color: #fff;
+  background-color: #0008;
+}

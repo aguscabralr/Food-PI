@@ -1,16 +1,23 @@
 // Import actions-type
-import { ANIMATE, FILTER_DIET, FILTER_ORIGIN, FIND_RECIPES, GET_DIETS, GET_RECIPES } from './actions-type';
+import { ACTIVE, FILTER_DIET, FILTER_ORDER, FILTER_ORIGIN, FIND_RECIPES, GET_DETAIL, GET_DIETS, GET_RECIPES } from './actions-type';
 // Import reducers;
-import { filterDietRd, filterOriginRd, findRecipesRd, getDietsRd, getRecipesRd, } from './reducers/reducers';
-// Import extra reducers;
-import { animateRd } from './reducers/extra';
+import { activeRd, filterDietRd, filterOrderRd, filterOriginRd, findRecipesRd, getDetailRd, getDietsRd, getRecipesRd } from './reducers/reducers';
 
 const initialState = {
   recipes: [],
+  recipesDB: [],
+  recipesAPI: [],
+
+  detail: [],
+
   diets: [],
+
   finders: [],
   filters: [],
-  animation: false,
+  active: {
+    order: "A",
+    origin: "",
+  }
 };
 
 const reducer = (state = initialState, actions) => {
@@ -21,13 +28,16 @@ const reducer = (state = initialState, actions) => {
       return getRecipesRd(state, actions);
     case GET_DIETS:
       return getDietsRd(state, actions);
-    case FILTER_DIET:
-      return filterDietRd(state, actions);
+    case GET_DETAIL:
+      return getDetailRd(state, actions);
+    case FILTER_ORDER:
+      return filterOrderRd(state, actions);
     case FILTER_ORIGIN:
       return filterOriginRd(state, actions);
-    // Extra;
-    case ANIMATE:
-      return animateRd(state, actions);
+    case FILTER_DIET:
+      return filterDietRd(state, actions);
+    case ACTIVE:
+      return activeRd(state, actions);
     default:
       return { ...state };
   };

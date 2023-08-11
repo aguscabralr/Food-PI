@@ -1,5 +1,5 @@
 // Import styles;
-import style from './CreateForm.module.css';
+import style from './UpdateForm.module.css';
 import fondo from '../../assets/fondo.png';
 // Import utilities;
 import axios from 'axios';
@@ -11,18 +11,21 @@ import validate from './validate';
 // Import actions;
 import { getRecipes } from '../../redux/actions';
 
-const CreateForm = () => {
+const UpdateForm = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { detail } = useSelector(state => state);
+  const steps = detail.analyzedInstructions[0].steps.map(step => step.step);
+
   const [data, setData] = useState({
-    name: '',
-    image: '',
-    summary: '',
-    healthScore: 0,
-    analyzedInstructions: [''],
-    diets: [],
+    name: detail.title,
+    image: detail.image,
+    summary: detail.summary,
+    healthScore: detail.healthScore,
+    analyzedInstructions: steps,
+    diets: detail.diets,
   });
-  
+
   const [error, setError] = useState({
     name: '',
     image: '',
@@ -40,7 +43,7 @@ const CreateForm = () => {
     const { name, value } = event.target;
 
     if (name.startsWith('analyzedInstructions')) {
-      const index = Number(name.match(/\d+/)[0]);
+      const index = Number(name.match(/\d+/));
       const updateSteps = [...data.analyzedInstructions];
       updateSteps[index] = value;
       setData({ ...data, analyzedInstructions: updateSteps });
@@ -50,10 +53,13 @@ const CreateForm = () => {
       setError(validate({ ...data, [name]: value }));
     };
   };
-  
+
   const addStep = () => {
-    data.analyzedInstructions.length < 10 &&
+    if (data.analyzedInstructions.length < 10) {
       setData({ ...data, analyzedInstructions: [...data.analyzedInstructions, ''] });
+    
+      console.log(data.analyzedInstructions);
+    }
   };
   const deleteStep = () => {
     if (data.analyzedInstructions.length > 1) {
@@ -61,6 +67,7 @@ const CreateForm = () => {
       setData({ ...data, analyzedInstructions: [...data.analyzedInstructions] });
     };
   };
+
   const handleCheckChange = (event) => {
     const { value, checked } = event.target;
 
@@ -74,6 +81,7 @@ const CreateForm = () => {
     event.preventDefault();
     try {
       const recipe = {
+        id: detail.id,
         title: data.name,
         image: data.image,
         summary: data.summary,
@@ -84,43 +92,41 @@ const CreateForm = () => {
 
       if (error.name || error.image || error.summary || error.healthScore || error.analyzedInstructions.length > 1 || error.diets) window.alert('Review the data entered');
       else {
-        const { data } = await axios.post('/recipes', recipe);
-        console.log(data);
+        const { data } = await axios.put('/recipes', recipe);
         if (data) {
           dispatch(getRecipes());
-          alert('Recipe Created');
-          // navigate(`/detail/${data}`)
+          alert('Recipe Uptdated');
+          navigate(`/detail/${data}`);
         };
       };
     } catch (error) {
-      console.log(error);
-      alert(error.response.data);
+      alert('Update Failed');
     };
   };
-  
+
   return (
     <div className={style.container} style={{ backgroundImage: `url(${fondo})` }}>
       <form className={style.formContainer} onSubmit={handleSubmit}>
         <div className={style.divition}>
           <div className={style.inputContainer}>
-            <label htmlFor='name'>Name | {error.name ? `❌ ${error.name}` : `✔️`}</label>
+            <label htmlFor='name'>Name | {error.name ? `❌ ${error.name}` : data.name === detail.title ? `⭕` : '✔️'}</label>
             <input type='text' name='name' value={data.name} onChange={handleInputChange} placeholder='Insert the name of your recipe...'/> 
           </div>
           <div className={style.inputContainer}>
-            <label htmlFor='image'>Image | {error.image ? `❌ ${error.image}` : `✔️`}</label>
+            <label htmlFor='image'>Image | {error.image ? `❌ ${error.image}` : data.image === detail.image ? `⭕` : '✔️'}</label>
             <input type='text' name='image' value={data.image} onChange={handleInputChange} placeholder='Insert the URL of your image...'/>
           </div>
           <div className={style.inputContainer}>
-            <label htmlFor='summary'>Summary | {error.summary ? `❌ ${error.summary}` : `✔️`}</label>
+            <label htmlFor='summary'>Summary | {error.summary ? `❌ ${error.summary}` : data.summary === detail.summary ? `⭕` : '✔️'}</label>
             <textarea name="summary" value={data.summary} cols="30" rows="5" onChange={handleInputChange} placeholder='Insert the summary of your recipe...'></textarea>
           </div>
           <div className={style.inputContainer}>
-            <label htmlFor='diets'>Diets | Select the corrects ✔️</label>
+            <label htmlFor='diets'>Diets | Select the corrects {JSON.stringify(data.diets.sort()) === JSON.stringify(detail.diets.sort()) ? `⭕` : '✔️'}</label>
             <div className={style.check}>
               {diets.length && diets.map((diet, index) => {
               return (
                 <div key={index}>
-                    <input type='checkbox' name='diets' value={diet.name} onChange={handleCheckChange} />
+                  <input type='checkbox' name='diets' value={diet.name} onChange={handleCheckChange} checked={data.diets.includes(`${diet.name}`)} />
                     <label htmlFor='diet'>{diet.name.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}</label>
                 </div>
               )
@@ -131,29 +137,30 @@ const CreateForm = () => {
         <div className={style.divition}>
           <div className={style.inputContainer}>
             <div className={style.title}>
-              <label htmlFor='analyzedInstructions'>Instructions | { error.analyzedInstructions[0] ? (error.analyzedInstructions[0].length ? `❌ ${error.analyzedInstructions[0]}` : `✔️`) : `✔️`} | </label>
+              <label htmlFor='analyzedInstructions'>Instructions | { error.analyzedInstructions[0] ? error.analyzedInstructions[0].length ? `❌ ${error.analyzedInstructions[0]}` : '✔️' : JSON.stringify(data.analyzedInstructions.sort()) === JSON.stringify(steps.sort()) ? `⭕` : '✔️'} | </label>
               <button type='button' onClick={addStep}>+</button>
               <button type='button' onClick={deleteStep}>-</button>
             </div>
             {data.analyzedInstructions.map((step, index) => {
+              // console.log(data.analyzedInstructions);
               return (
                 <div key={index} className={style.step}>
                   <label htmlFor='step'>Step {index + 1} |</label>
-                  <input type='text' name={`analyzedInstructions${[index]}`} value={data.analyzedInstructions[index]} onChange={handleInputChange} placeholder='Insert a step of your recipe...'/> {error.analyzedInstructions.includes(`Complete the step ${index + 1}`) ? '❌' : '✔️'}
+                  <input type='text' name={`analyzedInstructions${[index]}`} value={data.analyzedInstructions[index]} onChange={handleInputChange} placeholder='Insert a step of your recipe...'/> {error.analyzedInstructions.includes(`Complete the step ${index + 1}`) ? '❌' : data.analyzedInstructions[index] === steps ? `⭕` : '✔️'}
                 </div>
               )
             })
             }
           </div>
           <div className={style.inputContainer}>
-            <label htmlFor='healthScore'>Health Score | {error.healthScore ? `❌ ${error.healthScore}` : `✔️`}</label>
+            <label htmlFor='healthScore'>Health Score | {error.healthScore ? `❌ ${error.healthScore}` : parseInt(data.healthScore) === detail.healthScore ? `⭕` : '✔️'}</label>
             <div className={style.range}>
               <input type='range' min={0} max={100} name='healthScore' value={data.healthScore} onChange={handleInputChange} />
               <span>{data.healthScore}</span>
             </div>
           </div>
           <div>
-            <button type='submit'>Create Recipe</button>
+            <button type='submit'>Update Recipe</button>
           </div>
         </div>
       </form>
@@ -170,5 +177,4 @@ const CreateForm = () => {
   );
 };
 
-export default CreateForm;
-
+export default UpdateForm;

@@ -2,24 +2,35 @@
 import style from './Detail.module.css';
 import fondo from '../../assets/fondo.png'
 // Import utilities;
-import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-// Import actions;
 import axios from 'axios';
+import { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate, useParams } from 'react-router-dom';
+// Import actions;
+import { getDetail, getRecipes } from '../../redux/actions';
+
 
 
 const Detail = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { id } = useParams();
-  const [detail, setDetail] = useState({});
-  const url = `http://localhost:3001/foodpi/recipes/id/${id}`;
+  const { detail } = useSelector(state => state);
 
   useEffect(() => {
-    axios(url)
-      .then(({ data }) => {
-        setDetail(data);
-      });
-    return setDetail({});
+    dispatch(getDetail(id));
   }, [id]);
+
+  const handleDetele = async () => {
+    if (confirm('Are you sure to delete this recipe?')) {
+      const { data } = await axios.delete(`/recipes/${id}`);
+      if (data) {
+        dispatch(getRecipes());
+        alert('Deleted Recipe');
+        navigate('/home');
+      };
+    };
+  };
 
   return (
     <div className={style.conteiner} style={{ backgroundImage: `url(${fondo})`}}>
@@ -28,6 +39,10 @@ const Detail = () => {
           ? <div className={style.infoContainer}>
               <div className={style.port}>
                 <div className={style.info}>
+                  <div className={style.modify}>
+                    {detail.id.includes('-') && <button onClick={() => navigate('/update')}>✎</button>}
+                    {detail.id.includes('-') && <button onClick={handleDetele}>🗑️</button>}
+                  </div>
                   <h1>{detail.title && detail.title}</h1>
                   <div className={style.text}>
                     <h2>HEALTH SCORE</h2>

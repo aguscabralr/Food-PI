@@ -27,3 +27,7 @@
   background-size: contain;
   background-repeat: no-repeat;
 }
+
+.filterContainer select {
+  width: 100%;
+}

@@ -16,6 +16,10 @@ const LandingPage = () => {
       <div className={style.port} style={{ backgroundImage: `url(${logo})` }}></div>
       <div className={style.info}>
         <div className={style.accessContain}>
+          <div className={style.text}>
+            <h2>Welcome to FoodPi</h2>
+            <h4>Thanks for visiting us & Enjoy cooking</h4>
+          </div>
           <Link to={'/home'} style={{ textDecoration: 'none' }}>
             <div className={style.enter}>Enter</div>
           </Link>

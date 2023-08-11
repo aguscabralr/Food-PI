@@ -26,21 +26,31 @@
     height: 450px;
     display: grid;
     place-content: center;
+    position: relative;
     border: 1px solid #fff;
 }
+.modify {
+    position: absolute;
+    
+}
+
 .info .text {
     text-align: center;
 }
+
 .text h2 {
     margin-bottom: 0;
 }
+
 .text p {
     margin: 0 auto;
 }
+
 .foto {
     width: 49%;
     height: 450px;
 }
+
 .foto img {
     width: 100%;
     height: 100%;
@@ -57,14 +67,17 @@
     grid-template-columns: 100px 1fr 400px;
     border: 1px solid #fff;
 }
+
 .steps h3 {
     margin: auto;
     padding: 10px;
 }
+
 .steps p {
     margin: auto 0;
     padding: 10px;
 }
+
 .steps ul {
     margin: auto 0;
     padding: 10px;

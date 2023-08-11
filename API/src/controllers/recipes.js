@@ -2,17 +2,21 @@
 require('dotenv').config();
 const { API_KEY } = process.env;
 // Import utilities;
-const axios = require('axios')
+const axios = require('axios');
+const { Op } = require("sequelize");
 // Import model from DB;
 const { Recipes, Diets, DietRecipe } = require('../db');
 
+// Necesary const;
 const url = 'https://api.spoonacular.com/recipes';
 const aK = `apiKey=${API_KEY}`;
-console.log(aK);
 
+// Function that provide to the diets property the information from the DB;
 const dietsDB = async (id) => {
+  // Search all dietsRecipes with the id recived from params;
   const dietsRecipeDB = await DietRecipe.findAll({ where: { RecipeId: `${id}` } });
-  if (dietsRecipeDB) {
+  if (dietsRecipeDB.length) {
+    // If find something above, look up the diet id to get the name and push it to a new array;
     let dietsArray = [];
     for (let i = 0; i < dietsRecipeDB.length; i++) {
       const dietName = await Diets.findOne({ where: { id: dietsRecipeDB[i].DietId, } });
@@ -22,11 +26,15 @@ const dietsDB = async (id) => {
   } else return []
 };
 
+// Function that provide an array with the diets from the DB and API;
 const getRecipes = async (req, res) => {
   try {
+    // Recipes from DB;
+    // Search all the recipes;
     const responseDB = await Recipes.findAll();
-
+    // Function that return an object with the necesary info of the recipe;
     const recipesDB = await Promise.all(responseDB.map(async (recipe) => {
+      // Await the response from the dietsDB function that return an array with the diets;
       const dietsArray = await dietsDB(recipe.id);
       return ({
         id: recipe.id,
@@ -39,11 +47,15 @@ const getRecipes = async (req, res) => {
       });
     }));
 
+    // Recipes from API;
+    // Destructuring from axios response that provide only the data property;
     const { data } = await axios(`${url}/complexSearch?addRecipeInformation=true&number=100&${aK}`);
+    // Destructuring form data that provide an array of 100 recipes;
     const { results } = data;
-  
-    const recipes = recipesDB.concat(results);
 
+    // Joining arrays of the recipes from DB and API;
+    const recipes = recipesDB.concat(results);
+    // Format all recipes included in the array created above;    
     const allRecipes = recipes.map((recipe) => {
       return ({
         id: recipe.id,
@@ -55,9 +67,12 @@ const getRecipes = async (req, res) => {
         diets: recipe.diets,
       });
     });
-
+    // Analize results and the return the responses;
     if (recipes.length) return res.status(200).json(allRecipes);
-    else return res.status(404).send('Recipes Not Found');
+    else {
+      alert('Recipes not found or Error with the response')
+      return res.status(404).send('Recipes Not Found');
+    };
   } catch (error) {
     return res.status(500).json(error.message);
   };
@@ -65,94 +80,84 @@ const getRecipes = async (req, res) => {
 
 const getRecipesById = async (req, res) => {
   try {
+    // Get params sent by client
     const { id } = req.params;
+    // Analyze the type of id, if it is just a number, it comes from the API 
+    // but if it has a hyphen, for example, it is a UUID then it comes from the DB;
     if (id.includes('-')) {
-      const responseDB = await Recipes.findAll({ where: { id: `${id}` } });
-      
-      const recipeDB = await Promise.all(responseDB.map(async (recipe) => {
-        const dietsArray = await dietsDB(recipe.id);
-        return ({
-          id: recipe.id,
-          title: recipe.title,
-          image: recipe.image,
-          summary: recipe.summary,
-          healthScore: recipe.healthScore,
-          analyzedInstructions: recipe.analyzedInstructions,
-          diets: dietsArray,
-        });
-      }));
-      if (recipeDB) return res.status(200).json(recipeDB[0]);
-      else throw Error(`<${id}> didn´t match any recipe`);
+      // Case that comes from the DB, search the id and return the recipe
+      const responseDB = await Recipes.findOne({ where: { id: `${id}` } });
+      const dietsArray = await dietsDB(responseDB.id);
+      const recipeDB = {
+        id: responseDB.id,
+        title: responseDB.title,
+        image: responseDB.image,
+        summary: responseDB.summary,
+        healthScore: responseDB.healthScore,
+        analyzedInstructions: responseDB.analyzedInstructions,
+        diets: dietsArray,
+      }
+      if (recipeDB) return res.status(200).json(recipeDB);
+      else {
+        alert(`Error searching the id ${id}`);
+        return res.status(404).send(`${id} don´t match with any recipe`);
+      }
     } else {
+      // Case that comes from the API, do a petition to the api with the id and return the recipe
       const { data } = await axios(`${url}/${id}/information?${aK}&includeNutrition=false`);
       const { title, diets, image, summary, healthScore, analyzedInstructions } = data;
       const recipe = { id, title, diets, image, summary, healthScore, analyzedInstructions };
-      if (!recipe) throw Error(`<${id}> didn´t match any recipe`);
-      return res.status(200).json(recipe);
-    };
-  } catch (error) {
-    return res.status(500).json(error);
-  };
-};
-
-const getRecipesByName = async (req, res) => {
-  try {
-    const { name } = req.query;
-    const { data } = await axios(`${url}/complexSearch?query=${name}&addRecipeInformation=true&${aK}`);
-    const { results } = data;
-    if (results.length) return res.status(200).json(results);
-    else {
-      const nameRecipeDB = await Recipes.findAll({ where: { name } });
-      if (!nameRecipeDB.length) throw Error(`<${name}> didn´t match any recipe`);
-      return res.status(200).json(nameRecipeDB);
-    };
-  } catch (error) {
-    return res.status(404).json(error.message);
-  };
-};
-
-const postRecipe = async (req, res) => {
-  try {
-    const { title, image, summary, healthScore, analyzedInstructions, diets } = req.body;
-
-    const formatInstructions = [{ "name": "", "steps": [] }];
-        
-    for (let i = 0; i < analyzedInstructions.length; i++) {
-      const newStep = {};
-      newStep.number = i + 1;
-      newStep.step = analyzedInstructions[i];
-      newStep.ingredients = [];
-      formatInstructions[0].steps.push(newStep);
-    };
-    const newRecipe = {
-      title,
-      image,
-      summary,
-      healthScore,
-      analyzedInstructions: formatInstructions,
-    };
-    console.log(newRecipe);
-    
-    if (diets.length) {
-      const newRecipeDB = await Recipes.create(newRecipe);
-      const dietsPromises = diets.map(async (diet) => {
-        const dietsMatch = await Diets.findOne({ where: { name: diet } });
-        return { id: dietsMatch.id, name: dietsMatch.name };
-      });
-
-      const dietsRecipe = await Promise.all(dietsPromises);
-      await newRecipeDB.addDiets(dietsRecipe.map(diet => diet.id));
-
-      return res.status(200).send('Recipe created');
-    } else {
-      newRecipe.diets = diets;
-      const newRecipeDB = await Recipes.create(newRecipe);
-      newRecipeDB.addDiets(diets)
-      return res.status(200).json(newRecipe);
+      if (recipe) return res.status(200).json(recipe);
+      else {
+        alert(`Error searching the id ${id}`);
+        return res.status(404).send(`${id} don´t match with any recipe`);
+      };
     };
   } catch (error) {
     return res.status(500).json(error.message);
   };
 };
 
-module.exports = { getRecipes, getRecipesById, getRecipesByName, postRecipe };
+const getRecipesByName = async (req, res) => {
+  try {
+    // Get the name from query;
+    const { name } = req.query;
+    const nameRecipesDB = await Recipes.findAll({ where: { title: { [Op.iLike]: `%${name}%` } } });
+    const recipesDB = await Promise.all(nameRecipesDB.map(async (recipe) => {
+      const dietsArray = await dietsDB(recipe.id);
+      return ({
+        id: recipe.id,
+        title: recipe.title,
+        image: recipe.image,
+        summary: recipe.summary,
+        healthScore: recipe.healthScore,
+        analyzedInstructions: recipe.analyzedInstructions,
+        diets: dietsArray,
+      });
+    }));
+
+    const { data } = await axios(`${url}/complexSearch?query=${name}&addRecipeInformation=true&${aK}`);
+    const { results } = data;
+    const nameRecipes = recipesDB.concat(results);
+    const allNameRecipes = nameRecipes.map((recipe) => {
+      return ({
+        id: recipe.id,
+        title: recipe.title,
+        image: recipe.image,
+        summary: recipe.summary,
+        healthScore: recipe.healthScore,
+        analyzedInstructions: recipe.analyzedInstructions,
+        diets: recipe.diets,
+      });
+    });
+    if (allNameRecipes.length) return res.status(200).json(allNameRecipes);
+    else {
+      allNameRecipes.push(false);
+      return res.status(404).json(allNameRecipes);
+    };
+  } catch (error) {
+    return res.status(500).send(error.message);
+  };
+};
+
+module.exports = { getRecipes, getRecipesById, getRecipesByName };

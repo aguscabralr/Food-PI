@@ -4,10 +4,15 @@
   height: calc(100vh - 80px);
   top: 80px;
   left: 250px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
   background-color: grey;
 }
 
 .cardsContainer {
+  width: 100%;
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
@@ -44,4 +49,10 @@
 @keyframes loading {
   0% { width: 0; }
   100% { width: 100%; }
+}
+
+.pagination {
+  width: 99%;
+  height: 50px;
+  background-color: #999;
 }

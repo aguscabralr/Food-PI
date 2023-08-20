@@ -5,7 +5,7 @@ const { Recipes, Diets, DietRecipe } = require('../db');
 const postRecipe = async (req, res) => {
   try {
     const { title, image, summary, healthScore, analyzedInstructions, diets } = req.body;
-  
+
     const formatInstructions = [{ "name": "", "steps": [] }];
     for (let i = 0; i < analyzedInstructions.length; i++) {
       const newStep = {};
@@ -23,7 +23,6 @@ const postRecipe = async (req, res) => {
       analyzedInstructions: formatInstructions,
     };
 
-    if (title.length > 2) return res.status(400).send('Error en longitud del titulo');
     const newRecipeDB = await Recipes.create(newRecipe);
 
     if (diets.length) {
